@@ -18,16 +18,13 @@ import argparse
 
 # used in codon pair calculation
 import re
-import collections
 
 # used in codon pair calculation
 import pandas as pd
 import numpy as np
-import scipy.stats.mstats
 
 # Only used in main()
 import Bio.SeqIO
-import Bio.Data.CodonTable
 
 global ref_trna
 trna_table = pd.read_csv('~/ml-expression/scales/codon_abundances.csv', \
