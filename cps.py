@@ -91,7 +91,7 @@ def calc_cpb(seq, ref):
 
     pairs['pairs_ref'] = pairs['pairs_ref'].apply(np.log)
 
-    return pairs['pairs_ref'].sum() / len(pairs.index)
+    return pairs['pairs_ref'].sum() / (len(pairs.index) - 1)
 
 
 def main():
