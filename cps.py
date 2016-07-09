@@ -19,6 +19,8 @@ import argparse
 # used in codon pair calculation
 import re
 
+from pkg_resources import resource_filename
+
 # used in codon pair calculation
 import pandas as pd
 import numpy as np
@@ -27,7 +29,8 @@ import numpy as np
 import Bio.SeqIO
 
 global ref_trna
-trna_table = pd.read_csv('~/ml-expression/scales/codon_abundances.csv', \
+trna_table = pd.read_csv(
+    resource_filename(__name__, 'data/codon_abundances.csv'),
     header=0, index_col=0, comment='#')
 
 def get_pairs(seq):
