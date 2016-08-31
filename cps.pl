@@ -7,7 +7,7 @@
 # Version 0.1
 #
 # Creation: 2005-11-20
-# 
+#
 #  Copyright (c) 2008 Research Foundation of the State University of
 #  New York. All rights reserved.
 #
@@ -47,7 +47,9 @@
 #  SUCH DAMAGE.
 #
 
-use lib "/ul/saladi/cps/lib";
+use Cwd qw(abs_path);
+use FindBin;
+use lib abs_path("$FindBin::Bin");
 use Common;
 use Getopt::Std;
 
@@ -59,7 +61,7 @@ for (my $i = 1; $i < 16; $i++)
 }
 
 my $MAX_SEQUENCE_LENGTH = 1000000;
-my $CODON_FILE_LOCATION = '/ul/saladi/cps/codons';
+my $CODON_FILE_LOCATION =  "$FindBin::Bin/codons";
 my $DEFAULT_CODONPAIR_FILE = '/ul/saladi/cps/Escherichia_coli__BL21_Gold_DE3_pLysS_AG__uid30681.cpf';
 
 &getopts("w:o:l:c:r:d:p:i:hs:q", \%args); # -v, -D, -o ARG, sets $args{v}, $args{D}, $args{o}
@@ -178,7 +180,7 @@ my $jp_factor;
 my $jp_summant;
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Function that imports the codon pair information from the codon pair file and 
+# Function that imports the codon pair information from the codon pair file and
 # stores it in a hash.
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sub import_codon_pair_info
@@ -195,7 +197,7 @@ sub import_codon_pair_info
   }
   close(CODON_PAIR_FILE);
 
-# Calculate the Jeffreys-Perks law constants 
+# Calculate the Jeffreys-Perks law constants
 
   $B = $powers_of_4[6];
   $Bl = $B/2;

@@ -11,7 +11,9 @@
 # Given a species' fasta information of the proteins, this utility
 # will output the codon pair information
 
-use lib "/temp/saladi/cps/lib";
+use Cwd qw(abs_path);
+use FindBin;
+use lib abs_path("$FindBin::Bin");
 
 use strict;
 use Common;
@@ -19,7 +21,7 @@ use Getopt::Std;
 use bignum;
 
 my $DEBUG_CODON_IMPORT = 0;
-my $CODON_FILE_LOCATION = '/temp/saladi/cps/codons';
+my $CODON_FILE_LOCATION =  "$FindBin::Bin/codons";
 
 # FASTA record
 my $fasta_record =
@@ -105,7 +107,7 @@ for (my $i = 0; $i < $powers_of_4[6]; $i++)
     print $aa_code{$aa1}, $aa_code{$aa2}, "\t";
     print "$cp\t";
     if (exists $codon_freq{$cd1} && exists $codon_freq{$cd2} && exists $aa_freq{$aa1} && exists $aa_freq{$aa2} && exists $aa_pair_freq{$aa_pair})
-    { 
+    {
       my $exp = $codon_freq{$cd1}*$codon_freq{$cd2}/($aa_freq{$aa1}*$aa_freq{$aa2})*$aa_pair_freq{$aa_pair};
       $exp = sprintf("%.2f", $exp);
       print $exp, "\t";
