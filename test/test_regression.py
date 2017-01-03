@@ -39,7 +39,7 @@ def cps_vs_ref(fna_file, ref_csv):
 
 
 def test_sp_genome_sp_cps():
-    cps_vs_ref("../data/sp_genome.fna", "../data/sp_ref.cps.tbd")
+    cps_vs_ref("../cps/data/sp_genome.fna", "../cps/data/sp_ref.cps.tbd")
     return
 
 
@@ -51,7 +51,8 @@ def test_ecolik12_ecde3():
 
 def test_ecolik12_sp():
     basename = "data/ecolik12.ffn"
-    cpb_vs_ref(basename, basename + ".sp_cpb", ref_fn="../data/sp_ref.cps.tbd")
+    cpb_vs_ref(basename, basename + ".sp_cpb",
+               ref_fn="../cps/data/sp_ref.cps.tbd")
     return
 
 
@@ -63,5 +64,6 @@ def test_daley_gfp_de3():
 
 def test_daley_gfp_sp():
     basename = "data/Daley_gfp.fna"
-    cpb_vs_ref(basename, basename + ".sp_cpb", ref_fn="../data/sp_ref.cps.tbd")
+    cpb_vs_ref(basename, basename + ".sp_cpb",
+               ref_fn="../cps/data/sp_ref.cps.tbd")
     return
