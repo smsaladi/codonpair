@@ -1,7 +1,10 @@
 codonpair
 =========
 
-This is an archive with code to calculate codon pair score and bias.
+This is an archive with code to calculate codon pair score and bias. CPS
+values are close, but not identical, with those produced by the perl
+script. This requires further investigation to figure out the differences.
+As a result, 2 of the regression tests don't pass.
 
 ## Installation
 
