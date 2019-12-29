@@ -14,7 +14,8 @@ Science. 2008 Jun 27;320(5884):1784-7. doi: 10.1126/science.1155761.
 https://www.ncbi.nlm.nih.gov/pubmed/18583614
 
 The difference(s) between the (python) implementation here and the earlier
-work requires further investigation. 2 regression tests don't pass.
+is tiny and could be tracked down with some further investigation.
+Thus, 2 regression tests don't pass (and it looks like the CI is failing).
 
 
 ## Installation
