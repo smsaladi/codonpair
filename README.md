@@ -1,31 +1,34 @@
 codonpair
 =========
 
-This is an archive with code to calculate codon pair score and bias. CPS
+`codonpair` calculates codon pair score and codon pair bias. CPS
 values are close, but not identical, with those produced by the perl
-script. This requires further investigation to figure out the differences.
-As a result, 2 of the regression tests don't pass.
+script from Dimitris Papamichail (`cps_perl` directory) and, presumably,
+used in the following work: 
+
+Virus attenuation by genome-scale changes in codon pair bias.
+Coleman JR1, Papamichail D, Skiena S, Futcher B, Wimmer E, Mueller S.
+Science. 2008 Jun 27;320(5884):1784-7. doi: 10.1126/science.1155761.
+https://www.ncbi.nlm.nih.gov/pubmed/18583614
+
+The difference(s) between the (python) implementation here and the earlier
+work requires further investigation. 2 regression tests don't pass.
 
 ## Installation
 
-* Clone repo
+Either, clone the repo and install with pip
 
 ```shell
 git clone git@github.com:smsaladi/codonpair.git
+pip install ./codonpair
 ```
 
-* Install with `pip`
+Or... have pip handle the details:
 
 ```shell
-cd codonpair
-pip install .
-```
-
-* If you've already installed the package and want to reinstall, try
-
-```shell
-pip install . -I
+pip install git+git://github.com/smsaladi/codonpair@master#codonpair
 ```
 
 All dependencies should be checked for and, if necessary, installed
 automatically by `pip`.
+
