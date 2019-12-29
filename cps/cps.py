@@ -6,6 +6,10 @@ and S. Mueller, "Virus attenuation by genome-scale changes in
 codon-pair bias: a novel method for developing viral vaccines"
 Science, Vol. 320, 1784-1787, 27 June 2008
 
+
+Usage of globals `ref_pair_df` and `cur_ref_fn` isn't great, but 
+that's for the next person to refactor
+
 Shyam Saladi (saladi@caltech.edu)
 """
 
@@ -30,25 +34,7 @@ cur_ref_fn = None
 """
 
 def codon_pair_ref(fn=None, force_reload=False):
-    """Calculate tAI for the provided nucleotide sequence
-
-    Parameters
-    ----------
-    fn : Optional[str]
-        Specifies the reference tRNA abundances used for calculation. `codonR`
-        refers to the abundances given with the original package. If specified
-        as a `dict`, abundances are taken directly where keys are codons and
-        values are counts of cognate tRNAs and values are cached until
-        `recalc_weights` = True.
-
-    Returns
-    -------
-    pd.DataFrame
-        XXXXX
-
-    Raises
-    ------
-    None
+    """Uses the codon pairs specified by fn to be used as reference
     """
     global ref_pair_df, cur_ref_fn
     if ref_pair_df is None or force_reload or fn != cur_ref_fn:
@@ -75,21 +61,9 @@ def codon_pair_ref(fn=None, force_reload=False):
 
 
 def prep_ref_data(ref):
-    """Calculate tAI for the provided nucleotide sequence
-
-    Parameters
-    ----------
-    ref : pd.DataFrame
-        XXXXX
-
-    Returns
-    -------
-    pd.DataFrame
-        tAI value for the nucseq specified with the options given
-
-    Raises
-    ------
-    None
+    """Prepares the codon pair counts for CPS calculation
+    
+    Helper for `codon_pair_ref` (above)
     """
     # each codon's individial count
     ref = summarize_type(ref, 'codon1', 'codon2', 'cp_cnt')
@@ -114,21 +88,7 @@ def prep_ref_data(ref):
 
 
 def get_pairs(seq):
-    """Calculate codon pairs and relative frequency for each given a genome
-
-    Parameters
-    ----------
-    seq : str
-        XXXXX
-
-    Returns
-    -------
-    pd.Series
-        XXXXX
-
-    Raises
-    ------
-    None
+    """Calculates codon pair counts given a sequence as string
     """
     pairs = re.findall('......', seq)
     pairs.extend(re.findall('......', seq[3:-3])) # second frame
@@ -136,35 +96,12 @@ def get_pairs(seq):
 
 
 def summarize_type(df, value1, value2, total):
-    """Calculate codon pairs and relative frequency for each given a genome
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        XXXXX
-
-    value1 : str
-        XXXXX
-
-    value2 : str
-        XXXXX
-
-    total : str
-        XXXXX
-
-    Returns
-    -------
-    pd.DataFrame
-        tAI value for the nucseq specified with the options given
-
-    Raises
-    ------
-    None
+    """Helper function for calculating a codon pair reference
     """
     # counts are divided by 2 becuase each internal codons are counted twice,
     # but this isn't *exactly* correct becuase it doesn't properly treat
     # edge effects, i.e. the last codon isn't double counted. Done this way
-    # becuase the original implementation does this (c.a. line 224)
+    # becuase the original implementation (`cps_perl`) does this (c.a. line 224)
 
     value1_count = df[[value1, total]].groupby(value1).sum() # /2
     value2_count = df[[value2, total]].groupby(value2).sum() # /2
@@ -181,24 +118,11 @@ def summarize_type(df, value1, value2, total):
 
 
 def calc_reference(seqlist, codon_table='Standard'):
-    """Calculate codon pairs and relative frequency for each given a genome
+    """Calculate codon pairs and relative frequency for a sequence set
 
-    Parameters
-    ----------
-    seqlist : iterable of `Bio.SeqRecord`
-        XXXXXX
-
-    codon_table : Optional[str]
-        XXXXXX
-
-    Returns
-    -------
-    pd.DataFrame
-        XXXXX
-
-    Raises
-    ------
-    None
+    `seqlist` expected to be a iterable of `Bio.SeqRecord.SeqRecord`s
+    `codon_table` refers to keys given of
+    `Bio.Data.CodonTable.unambiguous_dna_by_name`
     """
     # Set up data frame for counting
     codons = pd.DataFrame.from_dict(
@@ -230,35 +154,23 @@ def calc_reference(seqlist, codon_table='Standard'):
 
 
 def calc_cpb(seq, ref_fn=None):
-    """Calculate codon pairs and relative frequency for each given a genome
+    """Calculate codon pair bais for a given gene against a reference set
+    
+    Returns: cps_sum, pair_count, cps_sum/pair_count
 
-    Parameters
-    ----------
-    seq : str
-
-    ref_fn : Optional[str]
-        asdf
-
-    Returns
-    -------
-    float
-        tAI value for the nucseq specified with the options given
-
-    Raises
-    ------
-    None
-
-    Calculate codon pair bais for a given gene against a reference set
     "CPB is the arithmetic mean of the individual codon pair scores of all
     pairs making up the ORF." (Caption of Fig. S1 in Coleman, 2008). Equation
     shown in part S1B seems to be written incorrectly.
-
-    #   $B = $powers_of_4[6]; 4**6 = 4096
-    #   $Bl = $B/2; 4096/2 = 2048
-    #   $jp_factor = $total_codon_pairs / ($total_codon_pairs + 2048);
-    #   $jp_summant = 1/(2*($total_codon_pairs + $Bl));
-    #   $my $discounted_num = &discount($4 + 0);
-    #   $codon_pair{$2}->{num} = $4*$jp_factor + $jp_summant;
+ 
+    ## From the previous implementation (see `cps_perl`)
+        ```perl
+        $B = $powers_of_4[6]; 4**6 = 4096
+        $Bl = $B/2; 4096/2 = 2048
+        $jp_factor = $total_codon_pairs / ($total_codon_pairs + 2048);
+        $jp_summant = 1/(2*($total_codon_pairs + $Bl));
+        $my $discounted_num = &discount($4 + 0);
+        $codon_pair{$2}->{num} = $4*$jp_factor + $jp_summant;
+        ```
     """
 
     ref = codon_pair_ref(fn=ref_fn)
@@ -280,32 +192,6 @@ def calc_cpb(seq, ref_fn=None):
 
 
 def write_reference(seq_records, out_fn):
-    """Calculate codon pairs and relative frequency for each given a genome
-
-    Parameters
-    ----------
-    nucseq : str
-
-    seq_records : list of Bio.SeqRecord
-        Specifies the reference tRNA abundances used for calculation. `codonR`
-        refers to the abundances given with the original package. If specified
-        as a `dict`, abundances are taken directly where keys are codons and
-        values are counts of cognate tRNAs and values are cached until
-        `recalc_weights` = True.
-
-    out_fn : str
-        Weights for each codon are calculated only once using `calc_weights`
-        and then cached/stored in `trna_data`. If `True`, weights will be
-        recalculated.
-
-    Returns
-    -------
-    None
-
-    Raises
-    ------
-    None
-    """
     calc_reference(seq_records).to_csv(out_fn, sep='\t')
     return
 
