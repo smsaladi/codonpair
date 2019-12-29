@@ -1,0 +1,14 @@
+language: python
+cache: pip
+python:
+  - "3.5"
+  - "3.8"
+before_install:
+  - pip install -r requirements.txt
+  - pip install pytest
+install:
+  - pip install .
+script:
+  - cd test && pytest -s .
+    
+
