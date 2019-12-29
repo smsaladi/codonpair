@@ -14,6 +14,7 @@ https://www.ncbi.nlm.nih.gov/pubmed/18583614
 The difference(s) between the (python) implementation here and the earlier
 work requires further investigation. 2 regression tests don't pass.
 
+
 ## Installation
 
 Either, clone the repo and install with pip
@@ -32,3 +33,23 @@ pip install git+git://github.com/smsaladi/codonpair@master#codonpair
 All dependencies should be checked for and, if necessary, installed
 automatically by `pip`.
 
+
+## Usage
+
+Either use the executable `cps` installed into the path by pip:
+
+```shell
+cps test.fasta > test.scores.txt
+```
+
+The `cps` module, e.g.
+
+```python
+import cps
+
+cps.calc_cpb(dna_sequence)
+
+```
+
+See `cps.calc_reference` if you want to specify a reference genome/dataset.
+ 
