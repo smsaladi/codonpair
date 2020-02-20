@@ -20,17 +20,16 @@ def cpb_vs_ref(fna_file, ref_csv, **kwargs):
     calc[['new_cps_sum', 'new_pair_count', 'new_cpb']] = \
         calc['seq'].apply(cps.calc_cpb, **kwargs).apply(pd.Series)
 
-    diff_vals = calc[~np.isclose(
-        calc['old_cps_sum'], calc['new_cps_sum'], atol=1e-3, rtol=1)]
-    if diff_vals.size > 0:
+    diff_vals = (
+            ~np.isclose(calc['old_cps_sum'], calc['new_cps_sum']) |
+            ~np.isclose(calc['old_cpb'], calc['new_cpb'])
+    )
+    if diff_vals.sum() > 0:
         print("Differing values:")
-        print(diff_vals)
+        print(calc[diff_vals])
 
-    np.testing.assert_allclose(
-            calc['old_cps_sum'], calc['new_cps_sum'], atol=1e-3, rtol=1)
-
-    np.testing.assert_allclose(
-            calc['old_cpb'], calc['new_cpb'], atol=1e-3, rtol=1)
+    np.testing.assert_allclose(calc['old_cps_sum'], calc['new_cps_sum'])
+    np.testing.assert_allclose(calc['old_cpb'], calc['new_cpb'])
 
     return
 
@@ -43,8 +42,7 @@ def cps_vs_ref(fna_file, ref_csv):
 
     old_cps, new_cps = old_cps.align(new_cps, axis=0)
 
-    np.testing.assert_allclose(
-            old_cps['cp_cnt'], new_cps['cp_cnt'], atol=1e-4)
+    np.testing.assert_allclose(old_cps['cp_cnt'], new_cps['cp_cnt']) #, atol=1e-4)
     return
 
 def test_sp_genome_sp_cps():
