@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import pkg_resources
 
 import pandas as pd
 import numpy as np
 import Bio.SeqIO
 
-import cps
+import codonpair
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,7 +19,7 @@ def cpb_vs_ref(fna_file, ref_csv, **kwargs):
             pd.Series([str(rec.seq) for rec in Bio.SeqIO.parse(fh, 'fasta')])
 
     calc[['new_cps_sum', 'new_pair_count', 'new_cpb']] = \
-        calc['seq'].apply(cps.calc_cpb, **kwargs).apply(pd.Series)
+        calc['seq'].apply(codonpair.calc_cpb, **kwargs).apply(pd.Series)
 
     diff_vals = (
             ~np.isclose(calc['old_cps_sum'], calc['new_cps_sum']) |
@@ -38,16 +39,20 @@ def cps_vs_ref(fna_file, ref_csv):
     old_cps = pd.read_table(ref_csv, header=None, usecols=[0,1,3],
                             names=['aa_pair', 'cp', 'cp_cnt'], index_col=1)
 
-    new_cps = cps.calc_reference(Bio.SeqIO.parse(fna_file, "fasta"))
+    new_cps = codonpair.calc_reference(Bio.SeqIO.parse(fna_file, "fasta"))
 
     old_cps, new_cps = old_cps.align(new_cps, axis=0)
 
     np.testing.assert_allclose(old_cps['cp_cnt'], new_cps['cp_cnt']) #, atol=1e-4)
     return
 
+
+def pkgfile(fn):
+    return pkg_resources.resource_filename("codonpair", fn)
+
 def test_sp_genome_sp_cps():
-    cps_vs_ref(TEST_DIR + "/../cps/data/sp_genome.fna",
-               TEST_DIR + "/../cps/data/sp_ref.cps.tbd")
+    cps_vs_ref(pkgfile('data/sp_genome.fna'),
+               pkgfile('data/sp_ref.cps.tbd'))
     return
 
 def test_ecolik12_ecde3():
@@ -58,7 +63,7 @@ def test_ecolik12_ecde3():
 def test_ecolik12_sp():
     basename = TEST_DIR + "/data/ecolik12.ffn"
     cpb_vs_ref(basename, basename + ".sp_cpb",
-               ref_fn=TEST_DIR + "/../cps/data/sp_ref.cps.tbd")
+               ref_fn=pkgfile("data/sp_ref.cps.tbd"))
     return
 
 def test_daley_gfp_de3():
@@ -69,6 +74,5 @@ def test_daley_gfp_de3():
 def test_daley_gfp_sp():
     basename = TEST_DIR + "/data/Daley_gfp.fna"
     cpb_vs_ref(basename, basename + ".sp_cpb",
-               ref_fn=TEST_DIR + "/../cps/data/sp_ref.cps.tbd")
+               ref_fn=pkgfile("data/sp_ref.cps.tbd"))
     return
-
