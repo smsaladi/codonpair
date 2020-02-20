@@ -74,7 +74,7 @@ def get_pairs(seq):
     """Calculates codon pair counts given a sequence as string
     """
     pairs = re.findall('......', seq)
-    pairs.extend(re.findall('......', seq[3:-3])) # second frame
+    pairs.extend(re.findall('......', seq[3:])) # second frame
     return pd.Series(pairs, name='cp_cnt').value_counts(sort=False)
 
 
