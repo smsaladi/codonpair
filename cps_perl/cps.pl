@@ -62,7 +62,7 @@ for (my $i = 1; $i < 16; $i++)
 
 my $MAX_SEQUENCE_LENGTH = 1000000;
 my $CODON_FILE_LOCATION =  "$FindBin::Bin/codons";
-my $DEFAULT_CODONPAIR_FILE = '/ul/saladi/cps/Escherichia_coli__BL21_Gold_DE3_pLysS_AG__uid30681.cpf';
+my $DEFAULT_CODONPAIR_FILE = "$FindBin::Bin/../cps/data/ec_de3_ref.cps.tbd";
 
 &getopts("w:o:l:c:r:d:p:i:hs:q", \%args); # -v, -D, -o ARG, sets $args{v}, $args{D}, $args{o}
 
