@@ -11,15 +11,20 @@ import codonpair
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def cpb_vs_ref(fna_file, ref_csv, **kwargs):
+def cpb_vs_ref(fna_file, ref_csv, ref_fn=None):
     # Read reference features
     calc = pd.read_table(ref_csv, header=None, names=['old_cps_sum', 'old_cpb'])
     with open(fna_file, 'r+') as fh:
         calc['seq'] = \
             pd.Series([str(rec.seq) for rec in Bio.SeqIO.parse(fh, 'fasta')])
 
-    calc[['new_cps_sum', 'new_pair_count', 'new_cpb']] = \
-        calc['seq'].apply(codonpair.calc_cpb, **kwargs).apply(pd.Series)
+    if ref_fn is None:
+        cp = codonpair.CodonPair()
+    else:
+        cp = codonpair.CodonPair.from_reference_file(ref_fn)
+    
+    calc[['new_cps_sum', 'new_cpb']] = \
+        calc['seq'].apply(lambda x: pd.Series(cp.cpb(x))[['total_cps', 'cpb']])
 
     diff_vals = (
             ~np.isclose(calc['old_cps_sum'], calc['new_cps_sum']) |
@@ -39,11 +44,14 @@ def cps_vs_ref(fna_file, ref_csv):
     old_cps = pd.read_table(ref_csv, header=None, usecols=[0,1,3],
                             names=['aa_pair', 'cp', 'cp_cnt'], index_col=1)
 
-    new_cps = codonpair.calc_reference(Bio.SeqIO.parse(fna_file, "fasta"))
+    cp = codonpair.CodonPair.from_sequences([
+        str(rec.seq) for rec in Bio.SeqIO.parse(fna_file, "fasta")
+    ])
+    new_cps = cp.df_ref
 
     old_cps, new_cps = old_cps.align(new_cps, axis=0)
 
-    np.testing.assert_allclose(old_cps['cp_cnt'], new_cps['cp_cnt']) #, atol=1e-4)
+    np.testing.assert_allclose(old_cps['cp_cnt'], new_cps['cp_cnt'])
     return
 
 
