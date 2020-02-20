@@ -167,7 +167,7 @@ def calc_cpb(seq, ref_fn=resource_filename(__name__, 'data/ec_de3_ref.cps.tbd'))
         #pairs = pairs[pd.notnull(pairs['pairs_ref'])]
 
     cps_sum = pairs['cp_cnt_cps'].sum()
-    pair_count = pairs['cp_cnt'].sum()
+    pair_count = np.sum(pairs['cp_cnt'] * pairs['cp_cnt_cps'].notnull())
 
     return (cps_sum, pair_count, cps_sum/pair_count)
 
