@@ -6,12 +6,10 @@ and S. Mueller, "Virus attenuation by genome-scale changes in
 codon-pair bias: a novel method for developing viral vaccines"
 Science, Vol. 320, 1784-1787, 27 June 2008
 
-
-Usage of globals `ref_pair_df` and `cur_ref_fn` isn't great, but 
-that's for the next person to refactor
-
 Shyam Saladi (saladi@caltech.edu)
 """
+
+from __future__ import print_function, division
 
 import sys
 import warnings
@@ -25,44 +23,27 @@ import numpy as np
 import Bio.SeqIO
 import Bio.Data.CodonTable
 
-ref_pair_df = None
-"""
-"""
-
-cur_ref_fn = None
-"""
-"""
-
-def codon_pair_ref(fn=None, force_reload=False):
+def codon_pair_ref(fn):
     """Uses the codon pairs specified by fn to be used as reference
     """
-    global ref_pair_df, cur_ref_fn
-    if ref_pair_df is None or force_reload or fn != cur_ref_fn:
-        if fn is None:
-            fn = resource_filename(__name__, 'data/ec_de3_ref.cps.tbd')
-        else:
-            cur_ref_fn = fn
-        ref_pair_df = pd.read_table(fn, header=0, index_col=0, na_filter=False)
+    ref_pair_df = pd.read_table(fn, header=0, index_col=0, na_filter=False)
+    if 'cps' not in ref_pair_df.columns:
+        # reading a file created by old cps.pl
+        ref_pair_df = pd.read_table(fn, header=None, usecols=[0,1,3],
+                                    na_filter=False, index_col=1,
+                                    names=['aa_pair', 'cps', 'cp_cnt'])
 
-        if 'cps' not in ref_pair_df.columns:
-            # reading a file created by old cps.pl
-            ref_pair_df = pd.read_table(fn, header=None, usecols=[0,1,3],
-                                        na_filter=False, index_col=1,
-                                        names=['aa_pair', 'cp', 'cp_cnt'])
-
-            ref_pair_df['codon1'] = ref_pair_df.index.str[:3]
-            ref_pair_df['codon2'] = ref_pair_df.index.str[-3:]
-            ref_pair_df['aa1'] = ref_pair_df['aa_pair'].str[0]
-            ref_pair_df['aa2'] = ref_pair_df['aa_pair'].str[1]
-
-        ref_pair_df = prep_ref_data(ref_pair_df)
-
+        ref_pair_df['codon1'] = ref_pair_df.index.str[:3]
+        ref_pair_df['codon2'] = ref_pair_df.index.str[-3:]
+        ref_pair_df['aa1'] = ref_pair_df['aa_pair'].str[0]
+        ref_pair_df['aa2'] = ref_pair_df['aa_pair'].str[1]
+    ref_pair_df = prep_ref_data(ref_pair_df)
     return ref_pair_df
 
 
 def prep_ref_data(ref):
     """Prepares the codon pair counts for CPS calculation
-    
+
     Helper for `codon_pair_ref` (above)
     """
     # each codon's individial count
@@ -77,6 +58,8 @@ def prep_ref_data(ref):
                    right_index=True, sort=False, copy=False)
 
     # Codon Pair Score adjusted by Jeffreys-Perks Law
+    # https://en.wikipedia.org/wiki/Additive_smoothing#Pseudocount
+    # alpha = 0.5 gives Jefferys-Perks Law
     tot_pairs = ref['cp_cnt'].sum()
     jp_factor = tot_pairs / (tot_pairs + 2048)
     jp_summant = 1 / (2 * (tot_pairs + 2048))
@@ -148,20 +131,18 @@ def calc_reference(seqlist, codon_table='Standard'):
     for record in seqlist:
         pairs['cp_cnt'] = pairs['cp_cnt'].add(get_pairs(str(record.seq)),
                                               fill_value=0)
-    global ref_pair_df
-    ref_pair_df = pairs
     return pairs
 
 
-def calc_cpb(seq, ref_fn=None):
+def calc_cpb(seq, ref_fn=resource_filename(__name__, 'data/ec_de3_ref.cps.tbd')):
     """Calculate codon pair bais for a given gene against a reference set
-    
+
     Returns: cps_sum, pair_count, cps_sum/pair_count
 
     "CPB is the arithmetic mean of the individual codon pair scores of all
     pairs making up the ORF." (Caption of Fig. S1 in Coleman, 2008). Equation
     shown in part S1B seems to be written incorrectly.
- 
+
     ## From the previous implementation (see `cps_perl`)
         ```perl
         $B = $powers_of_4[6]; 4**6 = 4096
@@ -173,7 +154,7 @@ def calc_cpb(seq, ref_fn=None):
         ```
     """
 
-    ref = codon_pair_ref(fn=ref_fn)
+    ref = codon_pair_ref(ref_fn)
 
     pairs = pd.DataFrame(get_pairs(seq))
 
