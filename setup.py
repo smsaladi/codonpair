@@ -9,7 +9,7 @@ setup(name='codonpair',
       license='MIT',
       packages=['codonpair'],
       install_requires=['numpy', 'pandas', 'biopython'],
-      package_data={'codonpair': ['data/*.tbd']},
+      package_data={'codonpair': ['data/*']},
       entry_points={'console_scripts': ['cps=codonpair.codonpair:main']},
       zip_safe=True,
       include_package_data=True
