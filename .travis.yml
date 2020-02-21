@@ -8,7 +8,7 @@ before_install:
   - pip install -r requirements.txt
   - pip install pytest
 install:
-  - pip install .
+  - pip install -v .
 script:
   - pytest -s -v --color=yes
 deploy:
