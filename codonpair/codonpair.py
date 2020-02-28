@@ -12,7 +12,6 @@ Shyam Saladi (saladi@caltech.edu)
 from __future__ import print_function, division
 
 import sys
-import warnings
 import re
 from collections import OrderedDict
 
@@ -25,7 +24,7 @@ import numpy as np
 import Bio.SeqIO
 import Bio.Data.CodonTable
 
-        
+
 class CodonPair():
     def __init__(self, df_pair_count=None):
         if df_pair_count is None:
@@ -112,7 +111,7 @@ class CodonPair():
         self.df_ref.to_csv(out_fn, sep='\t')
         return
 
-    def cpb(self, seq):
+    def cpb(self, seq, quiet=False):
         """Calculate codon pair bais for a given gene against a reference set
 
         Returns: cps_sum, pair_count, cps_sum/pair_count
@@ -137,8 +136,8 @@ class CodonPair():
 
         # Codon pairs present in the sequence of interest but not the reference
         # could indicate an issue with the sequence provided
-        if df_pair['cp_cnt_cps'].isnull().values.any():
-            warnings.warn('Codon pair found in sequence not found in reference.')
+        if not quiet and df_pair['cp_cnt_cps'].isnull().values.any():
+            UserWarning('Codon pair found in sequence not found in reference.')
             #pairs = pairs[pd.notnull(pairs['pairs_ref'])]
 
         cps_sum = df_pair['cp_cnt_cps'].sum()
